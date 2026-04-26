@@ -14,6 +14,7 @@ client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 class StudentProfile(BaseModel):
     mssv: str
     nganh: str
+    mon: str
     ly_do_rot: str
 
 def get_hard_logic_advice(profile: StudentProfile):
@@ -40,23 +41,31 @@ async def student_consultant(profile: StudentProfile):
     
     # Dùng AI để viết lại lời khuyên cho tự nhiên và cá nhân hóa
     prompt = f"""
-        Bạn là một cố vấn học tập tận tâm. Hãy viết một bức thư ngắn hoặc lời nhắn gửi đến sinh viên dựa trên thông tin sau:
+        Bạn là một cố vấn học tập tận tâm, tại Việt Nam. Hãy đưa ra giải pháp cải thiện nguy cơ rớt môn cho sinh viên dựa trên thông tin sau:
         - MSSV: {profile.mssv}
         - Ngành: {profile.nganh}
+        - Môn học bị cảnh báo: {profile.mon}
         - Lý do rớt môn: {profile.ly_do_rot}
-        - Các giải pháp gợi ý: {system_advice}
+        - Lưu ý của hệ thống: {system_advice}
         
-        Yêu cầu: 
-        1. Giọng văn động viên, chuyên nghiệp.
-        2. Đưa ra các giải pháp phù hợp với {system_advice}.
-        3. Đưa ra thêm lời khuyên về cách cải thiện dựa trên hướng giải quyết thông thường của các trường đại học.
+        Yêu cầu nội dung:
+        1. 'loi_khuyen': Phân tích ngắn gọn nguyên nhân và lời động viên.
+        2. 'tuan_1': Tuỳ vào lý do rớt môn, tập trung vào 1 trong 3 việc: hệ thống kiến thức, liên hệ giảng viên hoặc hoàn tất thủ tục hành chính.
+        3. 'tuan_2': Tập trung vào phân bổ thời gian luyện đề, tìm kiếm nhóm học tập để hỗ trợ nhau học.
         4. Định dạng JSON nghiêm ngặt.
+        5. Luôn trả về gợi ý bằng tiếng Việt
+        (Gợi ý này chỉ dành riêng cho {profile.mon} với lý do {profile.ly_do_rot})
+        (Sinh viên này chưa rớt môn, chỉ bị cảnh báo)
         (Sẽ có những lý do rớt môn khiến hệ thống không đưa ra được giải pháp gợi ý, hãy tạo ra các giải pháp phù hợp cho lý do này dự trên các cách giải quyết hoặc quy định thuộc các trường đại học tại Việt Nam)
+        (nếu sinh viên cần hệ thống kiến thức: trình bày rõ sinh viên cần học những chủ đề kiến thức gì dựa vào {profile.mon} và các tài liệu học tập liên quan đến môn trên mạng)
+        (tuan_2: nên nêu rõ sinh viên phải phân bổ ngày giờ học, luyện đề thế nào dựa vào hệ thống kiến thức ở tuan_1)
 
         Yêu cầu trả về duy nhất một đối tượng JSON có cấu trúc như sau:
         {{
             "mssv": {profile.mssv},
-            "loi_khuyen": "Giải pháp đưa ra để gợi ý cho sinh viên"
+            "loi_khuyen": "Lời khuyên dành cho sinh viên trong 2 tuần trước khi thi",
+            "tuan_1": "...",
+            "tuan_2": "..."
         }}
     """
 
